@@ -18,15 +18,15 @@ Pass criteria:
   - `scripts/consumer-contract-smoke.sh` (local `.bin` + extension asset + deterministic invocation checks),
   - `scripts/global-install-contract-smoke.sh` (global-prefix alias provenance + setup contract checks),
 - both entrypoints are proven in global context:
-  - `omg setup --scope project --json`
-  - `oh-my-gemini setup --scope project --dry-run --json`.
+  - `omp setup --scope project --json`
+  - `oh-my-product setup --scope project --dry-run --json`.
 
 Fail criteria:
 
 - installed bin execution fails,
 - extension assets are missing from the tarball,
 - global alias provenance/setup contract checks fail,
-- `npx` invocation without `--no-install` for `omg` is detected in checked scripts/docs/prompts/tests/CI.
+- `npx` invocation without `--no-install` for `omp` is detected in checked scripts/docs/prompts/tests/CI.
 
 ### C1 — Quality baseline (blocking)
 
@@ -47,7 +47,7 @@ npm run verify -- --tier light --dry-run --json
 Pass criteria:
 
 - all quality checks pass with hard-fail semantics (no hidden `continue-on-error`).
-- legacy compatibility bypass flags remain disabled (`OMG_LEGACY_RUNNING_SUCCESS!=1`, `OMG_LEGACY_VERIFY_GATE_PASS!=1`).
+- legacy compatibility bypass flags remain disabled (`OMP_LEGACY_RUNNING_SUCCESS!=1`, `OMP_LEGACY_VERIFY_GATE_PASS!=1`).
 - verification framework contracts pass (`test runners`, `tier selector`, `assertion helpers`).
 
 Fail criteria:
@@ -65,7 +65,7 @@ npm run gate:publish
 Pass criteria:
 
 - publish flow is gated by C0 + C1 equivalent checks (`gate:publish`),
-- `.github/workflows/release.yml` publish job runs only after `pre_release_blocking`.
+- `.github/workflows/release.yml` publish job triggers via `workflow_run` after CI succeeds (the previous `pre_release_blocking` job was removed in v0.5.7).
 
 ### C7 — Legacy bypass governance (blocking in CI/release)
 
@@ -78,7 +78,7 @@ npm run gate:legacy-bypass
 Pass criteria:
 
 - blocking workflows (`.github/workflows/ci.yml`, `.github/workflows/release.yml`) execute the policy gate before quality/release checks.
-- no blocking job relies on `OMG_LEGACY_RUNNING_SUCCESS=1` or `OMG_LEGACY_VERIFY_GATE_PASS=1`.
+- no blocking job relies on `OMP_LEGACY_RUNNING_SUCCESS=1` or `OMP_LEGACY_VERIFY_GATE_PASS=1`.
 
 Fail criteria:
 
@@ -122,7 +122,7 @@ npm run setup:subagents
 
 - `npm run verify` runs deterministic suites (`typecheck`, `smoke`, `integration`, `reliability`) by default.
 - tier bundles can scope execution: `light` (`typecheck,smoke`), `standard` (`typecheck,smoke,integration`), `thorough` (default full bundle).
-- `npm run omg -- verify --dry-run` is plan-only output; skipped suites are not treated as executed pass.
+- `npm run omp -- verify --dry-run` is plan-only output; skipped suites are not treated as executed pass.
 - Live Gemini/tmux operator-path evidence is collected separately in Gate 3 via `team:e2e`.
 - Optional key-authenticated Docker live smoke:
   `GEMINI_API_KEY=<key> npm run test:docker:full`.
@@ -138,10 +138,10 @@ npm run verify
 
 ### Pass criteria
 
-- `npm run omg -- team run` exits `0`
+- `npm run omp -- team run` exits `0`
 - `team run` enforces worker-count contract (`--workers 1..8`, default `3`)
 - successful runs persist canonical terminal phase `completed` (legacy `complete` normalized on read)
-- lifecycle artifacts recorded under `.omg/state`
+- lifecycle artifacts recorded under `.omp/state`
 - verify confirms expected workflow behavior
 
 ## Gate 2 — Reliability Hardening
@@ -162,7 +162,7 @@ npm run verify
   - watchdog failures (stale/invalid snapshot timestamps),
 - orchestrator enforces fix-loop cap (default `3`) and records a deterministic `failed` phase,
 - persisted worker heartbeat/status signals are merged into monitor snapshots,
-- runtime snapshots expose `verifyBaselinePassed`; absent/false verify gate signals fail deterministically unless explicit legacy compatibility flags are enabled (`OMG_LEGACY_VERIFY_GATE_PASS`, `OMG_LEGACY_RUNNING_SUCCESS`),
+- runtime snapshots expose `verifyBaselinePassed`; absent/false verify gate signals fail deterministically unless explicit legacy compatibility flags are enabled (`OMP_LEGACY_VERIFY_GATE_PASS`, `OMP_LEGACY_RUNNING_SUCCESS`),
 - state store writes canonical task/mailbox artifacts (`tasks/task-<id>.json`, `mailbox/<worker>.ndjson`) with compatibility reads for legacy payloads,
 - monitor/runtime failure paths surface actionable `failed` reasons.
 
@@ -178,7 +178,7 @@ npm run verify
 
 ```bash
 npm run gate:publish
-npm run team:e2e -- "oh-my-gemini release gate live evidence"
+npm run team:e2e -- "oh-my-product release gate live evidence"
 ```
 
 ### Optional feature-wise command
@@ -195,9 +195,9 @@ Reference: [`docs/testing/feature-readiness.md`](feature-readiness.md)
 
 - Documentation/command/code surfaces stay aligned (no README/gate/CLI contract drift),
 - `gate:publish` passes (`gate:global-install-contract` + `gate:3`),
-- live OMX team evidence (`start -> status polling -> shutdown`) is captured.
+- live omp team evidence (`start -> status polling -> shutdown`) is captured.
 - when `verify:features` is used, capability-group checks generate a report under
-  `.omx/reports/feature-readiness-*.md`.
+  `.omp/reports/feature-readiness-*.md`.
 
 ### Fail criteria
 
@@ -206,12 +206,12 @@ Reference: [`docs/testing/feature-readiness.md`](feature-readiness.md)
 - reliability or verify suites fail,
 - operator live e2e evidence is missing.
 
-## Optional Operator E2E — Live OMX Team (ad-hoc)
+## Optional Operator E2E — Live OMP Team (ad-hoc)
 
 ### Command
 
 ```bash
-npm run team:e2e -- "oh-my-gemini live team smoke"
+npm run team:e2e -- "oh-my-product live team smoke"
 ```
 
 ### Pass criteria
@@ -219,4 +219,4 @@ npm run team:e2e -- "oh-my-gemini live team smoke"
 - captures `Team started: <name>` startup evidence,
 - reaches terminal task state (`pending=0`, `in_progress=0`, `failed=0`) or
   executes graceful timeout shutdown path,
-- verifies cleanup of `.omx/state/team/<name>`.
+- verifies cleanup of `.omp/state/team/<name>`.
